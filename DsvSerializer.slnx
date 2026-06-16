@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DsvSerializer.ConsoleApp/DsvSerializer.ConsoleApp.csproj" />
+  <Project Path="DsvSerializer.Core/DsvSerializer.Core.csproj" />
+</Solution>
