@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,63 +24,49 @@ public static class DSVSerializer
         var members = type.GetMembers();
         
         var stringBuilder = new List<string>();
-        foreach (var member in members)
+        members.ToList().ForEach(m => BuilderTitle(stringBuilder, m));
+        /*foreach (var member in members)
         {
-            switch (member)
-            {
-                case FieldInfo field:
-                {
-                    var attributes = field.GetCustomAttributes();
-                    if (!attributes.Any(x => x.ToString().Contains("DSVIgnore")))
-                    {
-                        stringBuilder.Add(field.Name);
-                    }
-                }
-                    
-                    break;
-                case PropertyInfo property:
-                {
-                    var attributes = property.GetCustomAttributes();
-                    if (!attributes.Any(x => x.ToString().Contains("DSVIgnore")))
-                    {
-                        stringBuilder.Add(property.Name);
-                    }
-                }
-                    break;
-            }
-        }
+            BuilderTitle(stringBuilder, member);
+        }*/
         var headerLine = string.Join(separator, stringBuilder);
         
         stringBuilder.Clear();
-        foreach (var member in members)
+        members.ToList().ForEach(m => Builder(stringBuilder, m ,obj));
+        /*foreach (var member in members)
         {
-            switch (member)
-            {
-                case FieldInfo field:
-                {
-                    var attributes = field.GetCustomAttributes();
-                    if (!attributes.Any(x => x.ToString().Contains("DSVIgnore")))
-                    {
-                        stringBuilder.Add(field.GetValue(obj)?.ToString() ?? "");
-                    }
-
-                    break;
-                }
-                case PropertyInfo property:
-                {
-                    var attributes = property.GetCustomAttributes();
-                    if (!attributes.Any(x => x.ToString().Contains("DSVIgnore")))
-                    {
-                        stringBuilder.Add(property.GetValue(obj)?.ToString() ?? "");
-                    }
-
-                    break;
-                }
-            }
-        }
+            Builder(stringBuilder, member, obj);
+        }*/
 
         var valueLine = string.Join(separator, stringBuilder);
         
         return $"{headerLine}\n{valueLine}";
     }
+
+    private static void BuilderTitle(List<string> stringBuilder, MemberInfo member)
+    {
+        var attributes = member.GetCustomAttributes();
+        if (attributes.Any(x => x.ToString().Contains("DSVIgnore"))) return;
+        if (member is PropertyInfo or FieldInfo)
+        {
+            stringBuilder.Add(member.Name);
+        }
+        
+    }
+    private static void Builder(List<string> stringBuilder, MemberInfo member, object obj)
+    {
+        var attributes = member.GetCustomAttributes();
+        if (attributes.Any(x => x.ToString().Contains("DSVIgnore"))) return;
+        
+        switch (member)
+        {
+            case PropertyInfo property:
+                stringBuilder.Add(property.GetValue(obj)?.ToString() ?? "");
+                return;
+            case FieldInfo field:
+                stringBuilder.Add(field.GetValue(obj)?.ToString() ?? "");
+                return;
+        }
+    }
+    
 }
